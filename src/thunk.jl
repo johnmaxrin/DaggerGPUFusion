@@ -447,6 +447,7 @@ Spawns a `DTask` that will call `f(args...; kwargs...)`. Also supports passing a
 `Dagger.@spawn` for more details on `DTask`s.
 """
 function spawn(f, args...; kwargs...)
+    println("Hello!. I am in spawn")
     @nospecialize f args kwargs
 
     # Get all options and determine which propagate beyond this task

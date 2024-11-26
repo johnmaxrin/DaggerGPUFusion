@@ -67,6 +67,10 @@ include("sch/Sch.jl"); using .Sch
 # Data dependency task queue
 include("datadeps.jl")
 
+# GPU Fuse
+include("gpufusion.jl")
+
+
 # Array computations
 include("array/darray.jl")
 include("array/alloc.jl")
