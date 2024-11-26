@@ -40,7 +40,11 @@ function dofusion(queue)
     println("Dict \n", task_to_id[1])
 end
 
+```
+Todo
 
+1. Create a task dependency graph. 
+```
 
 ```
 Updates
