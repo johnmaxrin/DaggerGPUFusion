@@ -13,12 +13,20 @@ end
     B[idx] = A[idx]
 end
 
-A = CUDA.rand(Float32, 1000)
-B = CUDA.rand(Float32, 1000)
+@kernel function kernel3()
+    p = 5+8
+end
+
+A = CUDA.rand(Float32, 10)
+B = CUDA.rand(Float32, 10)
+C = CUDA.rand(Float32, 10)
 
 scope = Dagger.scope(cuda_gpu=1)
 
 Dagger.gpufuse() do
-    t1 = Dagger.@spawn scope=scope Kernel(kernel1)(A)
-    t2 = Dagger.@spawn scope=scope Kernel(kernel2)(A, B)
+    Dagger.spawn_sequential() do
+        t1 = Dagger.@spawn scope=scope Kernel(kernel1)(A)
+        t2 = Dagger.@spawn scope=scope Kernel(kernel2)(A,B)
+        t3 = Dagger.@spawn scope=scope Kernel(kernel1)(C)
+    end
 end

@@ -1,5 +1,6 @@
 using TaskLocalValues
 using Graphs
+using GraphPlots
 export gpufuse
 
 
@@ -26,31 +27,47 @@ end
 
 
 function dofusion(queue)
-    g = SimpleDiGraph() # empty grph
-    task_to_id = IdDict{Int,Any}()
-    for (spec, task) in collect(queue.running_tasks)
-        
-
-        add_vertex!(g)
-        task_id = nv(g)
-        task_to_id[task_id] = spec
     
+    # Condtions to fuse two kernels
+        # 1. kernels are small and lightweight
+        # 2. kernels share input/output data
+
+    # Donot fuse if (Future)
+        # 1. kernels can be independently parallelized and 
+        #    system has abundant computational resources.
+        # 2. Do not fuse if tasks have different 
+        #    computational characteristics
+        
+    # Check if kernels share input and output data. 
+
+    task_mem_ref = Vector{Tuple{Int,Int}}()
+    task_id = 1
+    for (spec, task) in collect(queue.running_tasks)
+        for i in spec.args
+            push!(task_mem_ref,(task_id,Int(i.second.data.rc.obj.mem.ptr)))
+        end
+        task_id += 1
     end
 
-    println("Dict \n", task_to_id[1])
+
+    mem_to_task = Dict{Int, Vector{Int}}()
+    
+    for(task_id, mem_ref) in task_mem_ref
+        push!(get!(mem_to_task, mem_ref,[]), task_id)
+    end
+
+    g = SimpleGraph(task_id)
+    for tasks in values(mem_to_task)
+        for i in 1:length(tasks)
+            for j in i+1:length(tasks)
+                add_edge!(g, tasks[i], tasks[j])
+            end
+        end
+    end 
+
+
+
+    
 end
 
-```
-Todo
 
-1. Create a task dependency graph. 
-```
-
-```
-Updates
-
-1. I created a dictionary with vertex IDs (task IDs) and their 
-specifications, along with a graph, but I’m unsure how to 
-determine dependencies using the tasks and specifications. 
-
-```
